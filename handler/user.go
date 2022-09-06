@@ -24,10 +24,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		var errors []string
-		for _, v := range err.(validator.ValidationErrors) {
-			errors = append(errors, v.Error())
-		}
+		errors := helper.FormatError(err.(validator.ValidationErrors))
 		errorMessage := gin.H{"errors": errors}
 		jsonResponse := helper.APIResponse("Register Account Failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusBadRequest, jsonResponse)
@@ -38,10 +35,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	newUser, err := h.userService.RegisterUser(input)
 
 	if err != nil {
-		var errors []string
-		for _, v := range err.(validator.ValidationErrors) {
-			errors = append(errors, v.Error())
-		}
+		errors := helper.FormatError(err.(validator.ValidationErrors))
 		errorMessage := gin.H{"errors": errors}
 		jsonResponse := helper.APIResponse("Register Account Failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusBadRequest, jsonResponse)
