@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"go-bwa-startup/helper"
 	"go-bwa-startup/user"
 	"net/http"
 
@@ -27,12 +28,16 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	}
 
 	// struct diatas kita passing sebagai parameter service Register User
-	user, err := h.userService.RegisterUser(input)
+	newUser, err := h.userService.RegisterUser(input)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, user)
+	formatter := user.FormatUserRegister(newUser, "token")
+
+	jsonResponse := helper.APIResponse("Account has been registered", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, jsonResponse)
 
 }
