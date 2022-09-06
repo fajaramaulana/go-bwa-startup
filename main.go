@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"go-bwa-startup/handler"
 	"go-bwa-startup/user"
 	"log"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -19,20 +20,15 @@ func main() {
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
 
-	userInput := user.RegisterUserInput{}
+	userHandler := handler.NewUserHandler(userService)
 
-	userInput.Name = "Fajar"
-	userInput.Occupation = "Programmer"
-	userInput.Email = "fajar@gmail.com"
-	userInput.Password = "rahasia"
+	router := gin.Default()
 
-	newUser, err := userService.RegisterUser(userInput)
+	api := router.Group("/api/v1")
 
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	api.POST("/users", userHandler.RegisterUser)
 
-	fmt.Printf("%# v", newUser)
+	router.Run(":8081")
 
 	// input dari user
 	// handler mapping input dari user menjadi sebuah struct input
