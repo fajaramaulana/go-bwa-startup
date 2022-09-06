@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type userHandler struct {
@@ -22,18 +23,29 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	var input user.RegisterUserInput
 
 	err := c.ShouldBindJSON(&input)
-
 	if err != nil {
-		jsonResponse := helper.APIResponse(err.Error(), http.StatusBadRequest, "error", nil)
+		var errors []string
+		for _, v := range err.(validator.ValidationErrors) {
+			errors = append(errors, v.Error())
+		}
+		errorMessage := gin.H{"errors": errors}
+		jsonResponse := helper.APIResponse("Register Account Failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusBadRequest, jsonResponse)
+		return
 	}
 
 	// struct diatas kita passing sebagai parameter service Register User
 	newUser, err := h.userService.RegisterUser(input)
 
 	if err != nil {
-		jsonResponse := helper.APIResponse(err.Error(), http.StatusBadRequest, "error", nil)
+		var errors []string
+		for _, v := range err.(validator.ValidationErrors) {
+			errors = append(errors, v.Error())
+		}
+		errorMessage := gin.H{"errors": errors}
+		jsonResponse := helper.APIResponse("Register Account Failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusBadRequest, jsonResponse)
+		return
 	}
 
 	formatter := user.FormatUserRegister(newUser, "token")
