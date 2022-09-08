@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	Save(u User) (User, error)
+	FindByEmail(uInput User) (User, error)
 }
 
 type repository struct {
@@ -21,4 +22,15 @@ func (r *repository) Save(u User) (User, error) {
 	}
 
 	return u, nil
+}
+
+func (r *repository) FindByEmail(uInput User) (User, error) {
+	var user User
+	err := r.db.Where("email = ?", uInput.Email).Find(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }

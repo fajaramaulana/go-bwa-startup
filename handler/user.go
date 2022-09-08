@@ -49,3 +49,38 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusOK, jsonResponse)
 
 }
+
+func (h *userHandler) Login(c *gin.Context) {
+	// user memasukkan input (email & password)
+	// input ditangkap handler
+	// mapping dari input user ke input struct
+	// input struct passing service
+	// di service mencari dg bantuan repository (kalo mvc php = model) user dengan email x
+	// mencocokkan password
+
+	var input user.LoginUserInput
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		jsonResponse := helper.APIResponse("Login Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, jsonResponse)
+		return
+	}
+
+	newUser, err := h.userService.LoginUser(input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		jsonResponse := helper.APIResponse("Login Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, jsonResponse)
+		return
+	}
+
+	jsonResponse := user.FormatUserLogin(newUser)
+
+	c.JSON(http.StatusOK, jsonResponse)
+
+}
