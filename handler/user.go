@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"go-bwa-startup/auth"
 	"go-bwa-startup/helper"
 	"go-bwa-startup/user"
 	"net/http"
@@ -14,10 +15,11 @@ import (
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(uService user.Service) *userHandler {
-	return &userHandler{uService}
+func NewUserHandler(uService user.Service, aService auth.Service) *userHandler {
+	return &userHandler{uService, aService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
@@ -45,7 +47,17 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	formatter := user.FormatUserRegister(newUser, "token")
+	token, err := h.authService.GenerateToken(newUser.ID, newUser.Role)
+
+	if err != nil {
+		errors := helper.FormatError(err.(validator.ValidationErrors))
+		errorMessage := gin.H{"errors": errors}
+		jsonResponse := helper.APIResponse("Register Account Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, jsonResponse)
+		return
+	}
+
+	formatter := user.FormatUserRegister(newUser, token)
 
 	jsonResponse := helper.APIResponse("Account has been registered", http.StatusOK, "success", formatter)
 
@@ -73,7 +85,7 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	newUser, err := h.userService.LoginUser(input)
+	userLogin, err := h.userService.LoginUser(input)
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
@@ -82,7 +94,16 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	jsonResponse := user.FormatUserLogin(newUser)
+	token, err := h.authService.GenerateToken(userLogin.ID, userLogin.Role)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		jsonResponse := helper.APIResponse("Login Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, jsonResponse)
+		return
+	}
+
+	jsonResponse := user.FormatUserLogin(userLogin, token)
 
 	c.JSON(http.StatusOK, jsonResponse)
 

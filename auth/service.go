@@ -3,6 +3,7 @@ package auth
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 
@@ -36,6 +37,7 @@ func (s *jwtService) GenerateToken(userID int, levelUser int) (string, error) {
 
 	payload["userId"] = userID
 	payload["levelUser"] = levelUser
+	payload["exp"] = time.Now().Add(time.Hour * 12)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 

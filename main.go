@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-bwa-startup/auth"
 	"go-bwa-startup/config"
 	"go-bwa-startup/handler"
 	"go-bwa-startup/user"
@@ -20,8 +21,8 @@ func main() {
 	modeGin := os.Getenv("GIN_MODE")
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
-	userHandler := handler.NewUserHandler(userService)
-
+	authService := auth.NewService()
+	userHandler := handler.NewUserHandler(userService, authService)
 	gin.SetMode(modeGin)
 	router := gin.Default()
 

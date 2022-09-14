@@ -34,7 +34,7 @@ func FormatUserRegister(user User, token string) UserFormatterRegister {
 	return formatter
 }
 
-func FormatUserLogin(user User) UserFormaterReturnLogin {
+func FormatUserLogin(user User, token string) UserFormaterReturnLogin {
 	formatter := UserFormaterReturnLogin{
 		ID:             user.ID,
 		Name:           user.Name,
@@ -42,7 +42,7 @@ func FormatUserLogin(user User) UserFormaterReturnLogin {
 		Occupation:     user.Occupation,
 		AvatarFileName: user.Occupation,
 		Role:           user.Role,
-		Token:          user.Token,
+		Token:          token,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
 	}
